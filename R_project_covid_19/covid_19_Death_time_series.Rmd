@@ -1,0 +1,75 @@
+---
+title: "Covid_19 Animated plot on death cases"
+author: "Vishnu Prasad  J S"
+date: "2/8/2021"
+output: html_document
+---
+The library that are used for this code are `tidyverse` and `gganimate`   
+*steps*     
+1. Initial data set is loaded into the variable `Data` as csv file    
+2. Data is then grouped by date.  
+3. New variable rank is introduced using the `mutate()` function and the countries are ranked according to the death count.  
+4. Again on the grouped by date data, a new grouping of country is applied.  
+5. Finally the top 10 countries on each day are filtered.by using countries having rank `< 15`
+ then the data is grouped by country name   
+ 
+```{r message=FALSE, warning=FALSE}
+
+library(tidyverse)
+library(gganimate)
+Data <-read.csv ("full_grouped.csv", header =T) 
+death10 <- Data %>%
+  group_by(Date) %>%
+  mutate(rank = rank(-Deaths),
+         Value_lbl = paste0(" ",Deaths)) %>%
+  group_by(Country.Region) %>% 
+  filter(rank <=15) %>%
+  ungroup()
+
+
+```
+A static plot is generated for a particular year and with the additional formatting done so as to make the plot look good.
+
+```{r message=FALSE, warning=FALSE}
+staticplot = ggplot(death10, aes(rank, group = Country.Region, 
+                                      fill = as.factor(Country.Region), color = as.factor(Country.Region))) +
+  geom_tile(aes(y = Deaths/2,height = Deaths,width = 0.9), alpha = 0.8, color = NA) +
+  geom_text(size=8,aes(y = 0, label = paste(Country.Region, " ")), vjust = 0.2, hjust = 1) +
+  geom_text(size=8,aes(y=Deaths,label = Value_lbl, hjust=0)) +
+  coord_flip(clip = "off", expand = FALSE) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_reverse() +
+  guides(color = FALSE, fill = FALSE) +
+  theme(axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        legend.position="none",
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_line( size=.1, color="grey" ),
+        panel.grid.minor.x = element_line( size=.1, color="grey" ),
+        plot.title=element_text(size=27, hjust=0.5, face="bold", colour="black", vjust=-1),
+        plot.subtitle=element_text(size=18, hjust=0.5, face="italic", color="grey"),
+        plot.caption =element_text(size=8, hjust=0.5, face="italic", color="grey"),
+        plot.background=element_blank(),
+        plot.margin = margin(2,4, 2, 12, "cm"))
+
+```
+
+Finally the static plot is called over all the years to get an animated plot of the covid death reported in each country over the dates.
+
+```{r message=FALSE, warning=FALSE}
+
+anim = staticplot + transition_states(Date, transition_length = 4, state_length = 1) +
+  view_follow(fixed_x = TRUE)  +
+  labs(title = 'Covid-19 Total Death Cases : {closest_state}',  
+       subtitle  =  "Top 10 Countries",
+       caption  = "Death Cases | Data Source: WHO ")
+animate(anim, 300, fps = 30,  width = 1200, height = 1000, 
+        renderer = gifski_renderer("Covid_deaths.gif"))
+```
