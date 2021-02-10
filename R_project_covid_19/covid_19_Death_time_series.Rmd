@@ -1,7 +1,7 @@
 ---
 title: "Covid_19 Animated plot on death cases"
 author: "Vishnu Prasad  J S"
-date: "2/8/2021"
+date: "2/9/2021"
 output: html_document
 ---
 The library that are used for this code are `tidyverse` and `gganimate`   
