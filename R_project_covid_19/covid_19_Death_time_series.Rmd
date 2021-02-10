@@ -70,6 +70,6 @@ anim = staticplot + transition_states(Date, transition_length = 4, state_length 
   labs(title = 'Covid-19 Total Death Cases : {closest_state}',  
        subtitle  =  "Top 10 Countries",
        caption  = "Death Cases | Data Source: WHO ")
-animate(anim, 300, fps = 30,  width = 1200, height = 1000, 
+animate(anim, 1000, fps = 30,  width = 1200, height = 1000, 
         renderer = gifski_renderer("Covid_deaths.gif"))
 ```
